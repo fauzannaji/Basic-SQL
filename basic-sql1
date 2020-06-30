@@ -1,0 +1,334 @@
+## Show table from databalse classicmodels
+show tables from classicmodels1
+
+## Show colums from table customer
+show columns from customers
+
+## Select function from table with limit
+select customerName , customerNumber from customers limit 4, 5
+
+##filter using where. 
+select customerNumber,customerName,creditLimit FROM customers WHERE creditLimit > 51600 AND creditLimit <= 60000
+select customerNumber,customerName,creditLimit FROM customers WHERE creditLimit between 51600 AND 60000 #51600 masuk ke dalam result
+
+# not case sensitive
+selEct * fRom cUstoMers whEre CounTry = 'FRanCe'
+
+# Where in , not in
+select * from customers where country in ('France', 'USA')
+
+select * from customers where country not in ('France', 'USA')
+
+# Combining OR & AND
+select * from customers where country in ('France', 'USA') or creditLimit < 50000
+
+select * from customers where (country = 'France' or country = 'usa') and creditLimit < 50000
+
+# Like Operation
+select customerName FROM customers WHERE customerName LIKE 'a%';
+
+select customerName FROM customers WHERE customerName LIKE '%S';
+
+select customerName FROM customers WHERE customerName LIKE 'a%S'; #start with a, end with s
+
+select customerName FROM customers WHERE customerName LIKE '%au%'; #ada au entah dimana
+
+select customerName FROM customers WHERE customerName LIKE '______t%'; #Huruf ke 7 t
+
+select customerName FROM customers WHERE customerName LIKE 'a__%'; #start with a, at least have 3 character
+
+# Order By Operation
+
+-- Count
+select productline, count(distinct productcode) from products p
+group by 1
+
+select productline, count(distinct productcode) from products p
+group by 1
+having count(distinct productCode) >11
+
+select count(*) as total_orders from orders o 
+
+-- SUM
+select sum(creditlimit) from customers c 
+
+-- MAX
+select max(status), count(status) from orders o 
+
+select count(*), status from orders o group by 2 order by 1 desc;
+
+select max(status) , count(status) from orders o where status = 'Shipped'
+
+-- MIN
+select min(orderDate) wkwk from orders o 
+
+
+-- AVG
+select avg(creditlimit) from customers
+
+-- sqrt
+select creditlimit, sqrt(creditlimit) from customers
+
+select upper(customerName), lower(country) FROM customers
+
+select customerName ,substring(customerName,1,5) FROM customers
+
+select concat(country, ', ', city) from customers;
+
+SELECT (5-10), ABS(5-10)
+select abs(amount) from payments
+
+SELECT POWER(2, 4);
+SELECT amount, POWER(amount, 4) from payments p ;
+
+SELECT COALESCE(NULL, 'A', 'B', NULL);
+
+#TIME
+
+SELECT CURRENT_DATE(), CURRENT_TIMESTAMP(), NOW();
+
+SELECT DATEDIFF(CURRENT_DATE, '2020-02-15'); #a dikurang b
+
+select HOUR(CURRENT_TIMESTAMP),CURRENT_TIMESTAMP
+
+SELECT DATE_ADD('2020-02-15', INTERVAL 5 DAY);
+
+SELECT DATE_SUB(CURRENT_DATE, INTERVAL 5 DAY);
+
+# Conditional
+
+select customerNumber,amount,
+IF(amount > 100000,'over_100000','below_100000') AS if_result FROM payments;
+
+select customerNumber,amount,
+IF(amount > 100000,'over_100000', if(amount>50000,'50000-100000','below_50000')) ifstatus FROM payments;
+
+-- CASE WHEN
+SELECT customerNumber,amount,
+CASE
+WHEN amount > 10000 AND amount <= 50000 THEN 'antara 10000 dan 50000'
+WHEN amount > 50000 AND amount <= 100000 THEN 'antara 50000 dan 100000'
+WHEN amount > 100000 THEN 'di atas 100000'
+ELSE 'di bawah 10000'END as case_when_result FROM payments;
+
+
+# Conversion or Cast
+
+SELECT CAST("2020-02-17" AS DATE) as tanggal ;
+SELECT "2020-02-17" as tanggalnyastring
+
+-- Cast string to integer
+SELECT CAST('1' AS INT);
+
+
+-- Cast date to string
+SELECT CAST(CURRENT_DATE AS CHAR);
+
+-- Cast number to string
+select cast(customerNumber as char) from payments p 
+
+SELECT UNIX_TIMESTAMP(CURRENT_TIMESTAMP), current_timestamp;
+
+-- CAST STRING to FLOAT;
+SELECT CAST('1000.22' as FLOAT);
+
+#JOIN
+
+-- Inner
+
+SELECT c.customerNumber,
+c.customerName,
+c.country,
+c.city,
+c.state,
+c.creditLimit,
+c.salesRepEmployeeNumber,
+e.firstname,
+e.lastName,
+e.jobTitle
+FROM customers c
+INNER JOIN employees e ON c.salesRepEmployeeNumber = e.employeeNumber;
+
+SELECT c.customerNumber,
+c.customerName,
+c.country,
+c.city,
+c.state,
+c.creditLimit,
+c.salesRepEmployeeNumber,
+e.firstname,
+e.lastName,
+e.jobTitle
+FROM customers c
+LEFT JOIN employees e ON c.salesRepEmployeeNumber = e.employeeNumber;
+
+SELECT c.customerNumber,
+c.customerName,
+c.country,
+c.city,
+c.state,
+c.creditLimit,
+c.salesRepEmployeeNumber,
+e.firstname,
+e.lastName,
+e.jobTitle
+FROM customers c
+RIGHT JOIN employees e ON c.salesRepEmployeeNumber = e.employeeNumber;
+
+SELECT c.customerNumber,
+c.customerName,
+c.country,
+c.city,
+c.state,
+c.creditLimit,
+c.salesRepEmployeeNumber,
+e.firstname,
+e.lastName,
+e.jobTitle
+FROM customers c
+left OUTER JOIN employees e ON c.salesRepEmployeeNumber = e.employeeNumber;
+
+
+#Exist
+
+SELECT
+customerNumber, customerName
+FROM
+customers
+WHERE
+EXISTS( SELECT
+customerNumber 
+FROM
+orders
+WHERE
+orders.customernumber = customers.customernumber);
+
+#Union all (Bisa ada duplicate data)
+SELECT
+customerNumber, customerName, salesRepEmployeeNumber,
+creditLimit
+FROM customers
+WHERE salesRepEmployeeNumber IS NOT NULL
+union all
+SELECT customerNumber, customerName,
+salesRepEmployeeNumber, creditLimit
+FROM customers
+WHERE salesRepEmployeeNumber IS NULL
+
+#Union (tidak ada duplicate)
+SELECT
+customerNumber
+FROM customers
+WHERE salesRepEmployeeNumber IS NOT NULL
+union 
+SELECT customerNumber 
+FROM customers
+WHERE salesRepEmployeeNumber IS NULL
+
+#Subquery
+
+SELECT
+*
+FROM
+(SELECT
+customerNumber,
+SUM(amount) AS total_amount
+FROM
+payments
+GROUP BY 1
+) trx
+WHERE trx.total_amount > 200000;
+
+
+SELECT
+customerNumber,
+SUM(amount) AS total_amount
+FROM
+payments
+group by 1
+having total_amount > 200000
+
+#Subquery dengan left join
+SELECT
+*
+FROM
+(SELECT
+customerNumber, SUM(amount) AS trx_amount
+FROM
+payments
+GROUP BY 1) AS trx
+LEFT JOIN
+customers c ON trx.customerNumber = c.customerNumber
+WHERE
+trx.trx_amount > 200000;
+
+#Subquery as filter dari c.customernumber yang udah di filter dari payement
+SELECT
+*
+FROM
+customers c
+WHERE
+c.customerNumber IN (SELECT
+customerNumber
+FROM
+payments
+GROUP BY 1
+HAVING SUM(amount) > 150000)
+
+#Ranking
+SELECT
+	a.*,
+    RANK() OVER (ORDER BY a.status DESC, a.orderNumber DESC) AS ranking
+from orders a
+
+# CTE (Common Table Expression)
+WITH trx_cte as
+(
+SELECT
+o.orderNumber,
+o.customerNumber,
+o.status,
+COUNT(DISTINCT od.productCode) AS total_products,
+SUM(od.priceEach * od.quantityOrdered) AS amount
+FROM
+orders o
+JOIN
+orderdetails od ON o.orderNumber = od.orderNumber
+GROUP BY 1,2,3
+ORDER BY 4 DESC)
+
+select o.orderNumber,
+t.total_products,
+t.amount
+from orders o
+inner join trx_cte t
+ON (o.orderNumber = t.orderNumber)
+
+
+
+#Contoh Query Complex
+
+SELECT
+	a.productLine,
+    SUM(a.total_trx),
+    SUM(a.amount),
+    SUM(a.revenue)
+FROM
+	(
+SELECT
+	p.productCode,
+    p.productName,
+    p.productLine,
+    p.productVendor,
+	COUNT(DISTINCT od.orderNumber) AS total_trx,
+	SUM(od.priceEach*od.quantityOrdered) AS amount,
+    SUM((od.priceEach-p.buyPrice)*quantityOrdered) AS revenue
+FROM orders o
+LEFT JOIN orderDetails od ON o.orderNumber = od.orderNumber
+LEFT JOIN products p ON od.productCode = p.productCode
+GROUP BY 1,2,3,4
+) a
+GROUP BY 1
+ORDER BY 4 DESC
+
+
